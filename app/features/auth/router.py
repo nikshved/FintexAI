@@ -5,10 +5,10 @@ from .schemas import RegisterRequest, TokenResponse
 from .service import AuthService
 
 
-router = APIRouter(prefix="/auth", tags=["auth"])
+auth_router = APIRouter(prefix="/auth", tags=["auth"])
 
 
-@router.post("/register")
+@auth_router.post("/register")
 async def register(data: RegisterRequest):
 
     await AuthService.register(
@@ -22,7 +22,7 @@ async def register(data: RegisterRequest):
     }
 
 
-@router.get("/verify-email", response_model=TokenResponse)
+@auth_router.get("/verify-email", response_model=TokenResponse)
 def verify_email(token: str, response: Response):
     tokens = AuthService.verify_email(token)
 
@@ -46,7 +46,7 @@ def verify_email(token: str, response: Response):
     }
 
 
-@router.post("/login", response_model=TokenResponse)
+@auth_router.post("/login", response_model=TokenResponse)
 def login(
     form_data: OAuth2PasswordRequestForm = Depends(),
     response: Response = None
@@ -77,7 +77,7 @@ def login(
     }
 
 
-@router.post("/refresh", response_model=TokenResponse)
+@auth_router.post("/refresh", response_model=TokenResponse)
 def refresh(request: Request, response: Response):
 
     refresh_token = request.cookies.get("refresh_token")
@@ -107,7 +107,7 @@ def refresh(request: Request, response: Response):
     }
 
 
-@router.post("/logout")
+@auth_router.post("/logout")
 def logout(request: Request, response: Response):
 
     refresh_token = request.cookies.get("refresh_token")

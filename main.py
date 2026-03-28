@@ -4,8 +4,9 @@ from pydantic import BaseModel
 from typing import List, Optional
 import uvicorn
 
-from app.features.auth.router import router
+from app.features.auth.router import auth_router
 from app.features.auth.dependencies import get_current_user
+from app.features.wallets.router import wallets_router
 from seeds.products_seed import fake_products_db
 from tests.test_routes import test_router
 
@@ -37,8 +38,9 @@ async def me(current_user = Depends(get_current_user)):
         "is_verified": current_user["is_verified"]
     }
 
-app.include_router(router)
 app.include_router(test_router)
+app.include_router(auth_router)
+app.include_router(wallets_router)
 
 # ========== ЗАПУСК ==========
 if __name__ == "__main__":
