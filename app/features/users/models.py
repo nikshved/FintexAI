@@ -2,7 +2,7 @@ from sqlalchemy import String, Boolean, Integer, ForeignKey, Table, Column
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from typing import List, Optional
 
-from app.db.base import Base
+from backend.app.db.postgres.base import Base
 
 class User(Base):
     """

@@ -4,95 +4,131 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from typing import List
 
 from .repo import WalletRepository
-from .schemas import (
-    WalletCreate,
-    WalletUpdate,
-    WalletFilters
-)
-
-repo = WalletRepository()
+from .schemas import WalletCreate, WalletUpdate, WalletFilters
 
 
 class WalletService:
 
+    def __init__(self):
+        self.repo = WalletRepository()
+
+    # ===== GET ONE =====
     async def get_wallet(
         self,
         db: AsyncSession,
         wallet_id: int
     ):
-        return await repo.get_by_id(db, wallet_id)
+        return await self.repo.get_by_id(db, wallet_id)
 
+    # # ===== GET BULK =====
+    # async def get_wallets(
+    #     self,
+    #     db: AsyncSession,
+    #     filters: WalletFilters
+    # ):
+    #     return await self.repo.get_many(db, filters)
 
-    async def get_wallets(
-        self,
-        db: AsyncSession,
-        filters: WalletFilters
-    ):
-        return await repo.get_many(db, filters)
+    # # ===== CREATE ONE =====
+    # async def create_wallet(
+    #     self,
+    #     db: AsyncSession,
+    #     data: WalletCreate
+    # ):
+    #     try:
+    #         wallet = await self.repo.create(
+    #             db,
+    #             data.model_dump()
+    #         )
+    #         await db.commit()
+    #         return wallet
 
+    #     except Exception:
+    #         await db.rollback()
+    #         raise
 
-    async def create_wallet(
-        self,
-        db: AsyncSession,
-        data: WalletCreate
-    ):
-        wallet = await repo.create(
-            db,
-            data.model_dump()
-        )
+    # # ===== CREATE BULK =====
+    # async def create_wallets(
+    #     self,
+    #     db: AsyncSession,
+    #     data: List[WalletCreate]
+    # ):
+    #     if not data:
+    #         return []
 
-        await db.commit()
-        return wallet
+    #     try:
+    #         wallets = await self.repo.create_many(
+    #             db,
+    #             [w.model_dump() for w in data]
+    #         )
+    #         await db.commit()
+    #         return wallets
 
+    #     except Exception:
+    #         await db.rollback()
+    #         raise
 
-    async def create_wallets(
-        self,
-        db: AsyncSession,
-        data: List[WalletCreate]
-    ):
-        wallets = await repo.create_many(
-            db,
-            [w.model_dump() for w in data]
-        )
+    # # ===== UPDATE =====
+    # async def update_wallet(
+    #     self,
+    #     db: AsyncSession,
+    #     wallet_id: int,
+    #     data: WalletUpdate
+    # ):
+    #     wallet = await self.repo.get_by_id(db, wallet_id)
 
-        await db.commit()
-        return wallets
+    #     if not wallet:
+    #         return None
 
+    #     try:
+    #         updated = await self.repo.update(
+    #             db,
+    #             wallet,
+    #             data.model_dump(exclude_unset=True)
+    #         )
+    #         await db.commit()
+    #         return updated
 
-    async def update_wallet(
-        self,
-        db: AsyncSession,
-        wallet_id: int,
-        data: WalletUpdate
-    ):
-        wallet = await repo.get_by_id(db, wallet_id)
+    #     except Exception:
+    #         await db.rollback()
+    #         raise
 
-        if not wallet:
-            return None
+    # # ===== DELETE ONE =====
+    # async def delete_wallet(
+    #     self,
+    #     db: AsyncSession,
+    #     wallet_id: int
+    # ):
+    #     wallet = await self.repo.get_by_id(db, wallet_id)
 
-        updated = await repo.update(
-            db,
-            wallet,
-            data.model_dump(exclude_unset=True)
-        )
+    #     if not wallet:
+    #         return False
 
-        await db.commit()
-        return updated
+    #     try:
+    #         await self.repo.delete(db, wallet)
+    #         await db.commit()
+    #         return True
 
+    #     except Exception:
+    #         await db.rollback()
+    #         raise
 
-    async def delete_wallet(
-        self,
-        db: AsyncSession,
-        wallet_id: int
-    ):
-        wallet = await repo.get_by_id(db, wallet_id)
+    # # ===== DELETE BULK =====
+    # async def delete_wallets(
+    #     self,
+    #     db: AsyncSession,
+    #     ids: List[int]
+    # ):
+    #     if not ids:
+    #         return 0
 
-        if not wallet:
-            return False
+    #     try:
+    #         deleted_count = await self.repo.delete_many(db, ids)
+    #         await db.commit()
+    #         return deleted_count
 
-        await repo.delete(db, wallet)
-        await db.commit()
-        return True
+    #     except Exception:
+    #         await db.rollback()
+    #         raise
 
 
 service = WalletService()

@@ -1,8 +1,8 @@
 from contextlib import asynccontextmanager
 from fastapi import FastAPI
 
-from .engine import engine
-from .base import Base
+from ..db.postgres.engine import engine
+from ..db.postgres.base import Base
 
 
 @asynccontextmanager

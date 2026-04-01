@@ -14,7 +14,7 @@ class WalletRepository:
         self,
         db: AsyncSession,
         wallet_id: int
-    ) -> Optional[Wallet]:
+    ) -> Wallet | None:
         return await db.get(Wallet, wallet_id)
 
 
@@ -26,7 +26,7 @@ class WalletRepository:
 
         query = select(Wallet)
 
-        # 🔥 фильтры
+        # 🔥 filters
         if filters.ids:
             query = query.where(Wallet.id.in_(filters.ids))
 
