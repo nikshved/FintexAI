@@ -1,4 +1,4 @@
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, ConfigDict, Field
 from typing import Optional, List
 from datetime import datetime
 from decimal import Decimal
@@ -28,9 +28,7 @@ class WalletRead(WalletBase):
     created_at: datetime
     updated_at: datetime
 
-    class Config:
-        from_attributes = True
-
+    model_config = ConfigDict(from_attributes=True)
 
 # ===== CREATE =====
 
@@ -41,7 +39,6 @@ class WalletCreate(WalletBase):
 # ===== UPDATE =====
 
 class WalletUpdate(BaseModel):
-    id: int = Field(gt=0)
     name: Optional[str] = Field(default=None, min_length=1, max_length=255)
     type: Optional[WalletType] = None
     initial_balance: Optional[Decimal] = Field(default=None, ge=0)
@@ -51,7 +48,7 @@ class WalletUpdate(BaseModel):
 # ===== BULK CREATE =====
 
 class WalletsCreate(BaseModel):
-    wallets: List[WalletCreate]
+    wallets: List[WalletCreate] = Field(min_items=1)
 
 
 # ===== BULK UPDATE =====
@@ -61,13 +58,13 @@ class WalletsUpdateItem(WalletUpdate):
 
 
 class WalletsUpdate(BaseModel):
-    wallets: List[WalletsUpdateItem]
+    wallets: List[WalletsUpdateItem] = Field(min_items=1)
 
 
 # ===== DELETE =====
 
 class WalletsDelete(BaseModel):
-    ids: List[int]
+    ids: List[int] = Field(min_items=1)
 
 
 # ===== FILTERS =====
@@ -89,8 +86,8 @@ class WalletFilters(BaseModel):
     updated_at_from: Optional[datetime] = None
     updated_at_to: Optional[datetime] = None
 
-    skip: int = 0
-    limit: int = 50
+    skip: int = Field(default=0, ge=0)
+    limit: int = Field(default=50, ge=1, le=1000)
 
     with_stats: bool = False
     stats_date_from: Optional[datetime] = None
