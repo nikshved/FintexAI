@@ -60,7 +60,7 @@ async def delete_wallet(
 # ===== GET BULK =====
 @wallets_router.get("/", response_model=List[WalletRead], status_code=status.HTTP_200_OK)
 async def get_wallets(
-    filters: WalletFilters = Depends(),
+    filters: WalletFilters = Depends(), # Query srtring
     db: AsyncSession = Depends(get_db)
 ):
     return await service.get_wallets(db, filters)

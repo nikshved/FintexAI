@@ -57,14 +57,14 @@ class Wallet(Base):
 
     initial_balance: Mapped[Decimal] = mapped_column(
         Numeric(20, 2),
-        default=Decimal("0.00"),
+        server_default=Decimal("0.00"),
         server_default="0.00",
         nullable=False
     )
 
     balance: Mapped[Decimal] = mapped_column(
         Numeric(20, 2),
-        default=Decimal("0.00"),
+        server_default=Decimal("0.00"),
         server_default="0.00",
         nullable=False
     )
