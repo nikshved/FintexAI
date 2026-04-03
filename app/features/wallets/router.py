@@ -10,7 +10,7 @@ from .schemas import (
     WalletsUpdate,
     WalletsDelete
 )
-from .service import service
+from .service import  service
 from app.db.postgres.session import get_db
 
 
@@ -23,7 +23,7 @@ async def get_wallet(
     wallet_id: int,
     db: AsyncSession = Depends(get_db)
 ):
-    wallet = await service.get_wallet(db, wallet_id)
+    wallet = await  service.get_wallet(db, wallet_id)
 
     if not wallet:
         raise HTTPException(status_code=404, detail="Wallet not found")

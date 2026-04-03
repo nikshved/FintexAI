@@ -49,7 +49,7 @@ class Wallet(Base):
 
     balance: Mapped[Decimal] = mapped_column(
         Numeric(20, 2),
-        server_default=Decimal("0.00"),
+        server_default="0.00",
         nullable=False
     )
 
@@ -57,5 +57,5 @@ class Wallet(Base):
         CheckConstraint(
             "balance >= 0",
             name="check_balance_non_negative"
-        )
+        ),
     )
