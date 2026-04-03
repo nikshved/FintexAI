@@ -1,7 +1,6 @@
 from datetime import datetime
 from decimal import Decimal
 from enum import Enum as PyEnum
-
 from sqlalchemy import (
     String,
     DateTime,
@@ -48,24 +47,9 @@ class Wallet(Base):
         nullable=False
     )
 
-    updated_at: Mapped[datetime] = mapped_column(
-        DateTime(timezone=True),
-        server_default=func.now(),
-        server_onupdate=func.now(),
-        nullable=False
-    )
-
-    initial_balance: Mapped[Decimal] = mapped_column(
-        Numeric(20, 2),
-        server_default=Decimal("0.00"),
-        server_default="0.00",
-        nullable=False
-    )
-
     balance: Mapped[Decimal] = mapped_column(
         Numeric(20, 2),
         server_default=Decimal("0.00"),
-        server_default="0.00",
         nullable=False
     )
 
@@ -73,9 +57,5 @@ class Wallet(Base):
         CheckConstraint(
             "balance >= 0",
             name="check_balance_non_negative"
-        ),
-        CheckConstraint(
-            "initial_balance >= 0",
-            name="check_initial_balance_non_negative"
-        ),
+        )
     )

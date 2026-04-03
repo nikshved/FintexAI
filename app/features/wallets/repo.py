@@ -22,10 +22,6 @@ class WalletRepository:
             query = query.where(Wallet.name.in_(filters.names))
         if filters.types:
             query = query.where(Wallet.type.in_(filters.types))
-        if filters.initial_balance_min is not None:
-            query = query.where(Wallet.initial_balance >= filters.initial_balance_min)
-        if filters.initial_balance_max is not None:
-            query = query.where(Wallet.initial_balance <= filters.initial_balance_max)
         if filters.balance_min is not None:
             query = query.where(Wallet.balance >= filters.balance_min)
         if filters.balance_max is not None:
@@ -54,8 +50,6 @@ class WalletRepository:
             raise
 
     async def create_many(self, db: AsyncSession, wallets_data: List[dict]) -> List[Wallet]:
-        if not wallets_data:
-            return []
         try:
             query = insert(Wallet).values(wallets_data).returning(Wallet)
             result = await db.execute(query)
@@ -85,29 +79,35 @@ class WalletRepository:
             raise
 
     async def update_many(self, db: AsyncSession, wallets_data: List[dict]) -> List[Wallet]:
-        if not wallets_data:
-            return []
-        try:
-            # Важно: предполагаем, что ключи во всех словарях одинаковые
-            query = (
-                update(Wallet)
-                .where(Wallet.id == bindparam("id"))
-                .values({
-                    col: bindparam(col) 
-                    for col in wallets_data[0].keys() if col != "id"
-                })
-                .returning(Wallet)
-            )
-            result = await db.execute(query, wallets_data)
-            updated_wallets = list(result.scalars().all())
-            
-            if updated_wallets:
-                await db.commit()
-            return updated_wallets
-        except Exception:
-            await db.rollback()
-            raise
+            updated_wallets = []
+            try:
+                for data in wallets_data:
+                    wallet_id = data.pop("id", None)
+                    if wallet_id is None:
+                        continue
 
+                    query = (
+                        update(Wallet)
+                        .where(Wallet.id == wallet_id)
+                        .values(**data) 
+                        .returning(Wallet)
+                    )
+                    
+                    result = await db.execute(query)
+                    updated_obj = result.scalar_one_or_none()
+                    
+                    if updated_obj:
+                        updated_wallets.append(updated_obj)
+
+                if updated_wallets:
+                    await db.commit()
+                    
+                return updated_wallets
+
+            except Exception:
+                await db.rollback()
+                raise
+            
     async def delete_one(self, db: AsyncSession, wallet_id: int) -> bool:
         try:
             query = delete(Wallet).where(Wallet.id == wallet_id).returning(Wallet.id)
@@ -123,8 +123,6 @@ class WalletRepository:
             raise
     
     async def delete_many(self, db: AsyncSession, wallet_ids: List[int]) -> List[int]:
-        if not wallet_ids:
-            return []
         try:
             query = delete(Wallet).where(Wallet.id.in_(wallet_ids)).returning(Wallet.id)
             result = await db.execute(query)
