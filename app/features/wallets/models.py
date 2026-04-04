@@ -50,7 +50,7 @@ class Wallet(Base):
     balance: Mapped[Decimal] = mapped_column(
         Numeric(20, 2),
         server_default="0.00",
-        nullable=False
+        nullable=False,
     )
 
     __table_args__ = (

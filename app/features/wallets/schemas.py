@@ -20,7 +20,12 @@ class WalletBase(BaseModel):
 # ===== READ (response) =====
 class WalletRead(WalletBase):
     id: int
-    balance: Decimal
+    balance: Decimal = Field(
+        max_digits=20, 
+        decimal_places=2, 
+        default=Decimal("0.00"),
+        examples=["100000.00"]  
+    )
     created_at: datetime
 
     model_config = ConfigDict(from_attributes=True)
