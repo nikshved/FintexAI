@@ -8,7 +8,7 @@ from app.features.auth.router import auth_router
 from app.features.auth.dependencies import get_current_user
 from app.features.wallets.router import wallets_router
 from seeds.products_seed import fake_products_db
-from tests.test_routes import test_router
+
 
 app = FastAPI(
     title="Store API",
@@ -38,7 +38,6 @@ async def me(current_user = Depends(get_current_user)):
         "is_verified": current_user["is_verified"]
     }
 
-app.include_router(test_router)
 app.include_router(auth_router)
 app.include_router(wallets_router)
 

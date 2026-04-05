@@ -1,5 +1,8 @@
+import os
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
+env_mode = os.getenv("APP_ENV", "dev")
+env_file = ".env.test" if env_mode == "test" else ".env"
 
 class Settings(BaseSettings):
 
@@ -27,7 +30,10 @@ class Settings(BaseSettings):
 
     DATABASE_URL: str
 
-    model_config = SettingsConfigDict(env_file=".env")
+    model_config = SettingsConfigDict(
+        env_file=env_file,
+        extra="ignore"
+    )
 
 
 settings = Settings()
