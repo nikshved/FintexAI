@@ -5,68 +5,57 @@ from decimal import Decimal
 from enum import Enum
 
 
-# ===== ENUM =====
+# --- ENUMS ---
 class WalletType(str, Enum):
     SAVINGS = "SAVINGS"
     SPENDINGS = "SPENDINGS"
 
 
-# ===== BASE =====
+# --- BASE SCHEMA ---
 class WalletBase(BaseModel):
     name: str = Field(min_length=1, max_length=255)
     type: WalletType
 
 
-# ===== READ (response) =====
+# --- READ SCHEMA (Response) ---
 class WalletRead(WalletBase):
     id: int
-    balance: Decimal = Field(
-        max_digits=20, 
-        decimal_places=2, 
-        default=Decimal("0.00"),
-        examples=["100000.00"]  
-    )
+    balance: Decimal = Field(max_digits=20, decimal_places=2)
     created_at: datetime
+    updated_at: datetime
 
     model_config = ConfigDict(from_attributes=True)
 
-# ===== CREATE =====
+
+# --- CREATE SCHEMA ---
 class WalletCreate(WalletBase):
-    balance: Decimal = Field(default=Decimal("0.00"), ge=0)
+    balance: Decimal = Field(default=Decimal("0.00"), ge=0, max_digits=20, decimal_places=2)
 
 
-# ===== UPDATE =====
+# --- UPDATE SCHEMA ---
 class WalletUpdate(BaseModel):
     name: Optional[str] = Field(default=None, min_length=1, max_length=255)
     type: Optional[WalletType] = None
 
 
-# ***** BULK OPERATIONS *****
-
-# ===== BULK CREATE =====
-
+# --- BULK OPERATIONS ---
 class WalletsCreate(BaseModel):
-    wallets: List[WalletCreate] = Field(min_items=1)
+    wallets: List[WalletCreate] = Field(min_length=1)
 
-
-# ===== BULK UPDATE =====
 
 class WalletsUpdateItem(WalletUpdate):
     id: int
 
 
 class WalletsUpdate(BaseModel):
-    wallets: List[WalletsUpdateItem] = Field(min_items=1)
+    wallets: List[WalletsUpdateItem] = Field(min_length=1)
 
-
-# ===== DELETE =====
 
 class WalletsDelete(BaseModel):
-    ids: List[int] = Field(min_items=1)
+    ids: List[int] = Field(min_length=1)
 
 
-# ===== FILTERS =====
-
+# --- FILTERS & PAGINATION ---
 class WalletFilters(BaseModel):
     ids: Optional[List[int]] = None
     names: Optional[List[str]] = None
@@ -78,9 +67,11 @@ class WalletFilters(BaseModel):
     created_at_from: Optional[datetime] = None
     created_at_to: Optional[datetime] = None
 
+    # Pagination 
     skip: int = Field(default=0, ge=0)
     limit: int = Field(default=50, ge=1, le=1000)
 
+    # Analytics 
     with_stats: bool = False
     stats_date_from: Optional[datetime] = None
     stats_date_to: Optional[datetime] = None
