@@ -7,7 +7,9 @@ from main import app
 from app.db.postgres.session import get_db
 from app.db.postgres.base import Base
 
-DATABASE_URL = "postgresql+asyncpg://postgres:furina131furina@localhost:5432/fintexai_test"
+DATABASE_URL = (
+    "postgresql+asyncpg://postgres:furina131furina@localhost:5432/fintexai_test"
+)
 
 engine = create_async_engine(DATABASE_URL)
 TestSessionLocal = sessionmaker(engine, class_=AsyncSession, expire_on_commit=False)
@@ -32,10 +34,7 @@ async def client(db):
 
     transport = ASGITransport(app=app)
 
-    async with AsyncClient(
-        transport=transport,
-        base_url="http://test"
-    ) as client:
+    async with AsyncClient(transport=transport, base_url="http://test") as client:
         yield client
 
     app.dependency_overrides.clear()

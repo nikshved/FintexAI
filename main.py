@@ -10,11 +10,7 @@ from app.features.wallets.router import wallets_router
 from seeds.products_seed import fake_products_db
 
 
-app = FastAPI(
-    title="Store API",
-    description="API for store",
-    version="1.0.0"
-)
+app = FastAPI(title="Store API", description="API for store", version="1.0.0")
 
 
 # --- Разрешаем запросы с любого фронтенда (CORS) ---
@@ -24,19 +20,22 @@ app.add_middleware(
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
-)   
+)
 
-@app.get("/")    
+
+@app.get("/")
 async def root():
     return {"message": "Store API"}
 
+
 @app.get("/me")
-async def me(current_user = Depends(get_current_user)):
+async def me(current_user=Depends(get_current_user)):
     return {
         "username": current_user["username"],
         "email": current_user["email"],
-        "is_verified": current_user["is_verified"]
+        "is_verified": current_user["is_verified"],
     }
+
 
 app.include_router(auth_router)
 app.include_router(wallets_router)

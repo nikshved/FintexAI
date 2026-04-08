@@ -4,8 +4,8 @@ from pydantic_settings import BaseSettings, SettingsConfigDict
 env_mode = os.getenv("APP_ENV", "dev")
 env_file = ".env.test" if env_mode == "test" else ".env"
 
-class Settings(BaseSettings):
 
+class Settings(BaseSettings):
     SECRET_KEY_ACCESS: str
     SECRET_KEY_REFRESH: str
     SECRET_KEY_VERIFY: str
@@ -15,8 +15,8 @@ class Settings(BaseSettings):
     REFRESH_TOKEN_EXPIRES: int
     VERIFY_TOKEN_EXPIRES: int
 
-    CLIENT_HOST_PROTOCOL: str 
-    CLIENT_HOST: str 
+    CLIENT_HOST_PROTOCOL: str
+    CLIENT_HOST: str
     CLIENT_PORT: int
 
     MAIL_USERNAME: str
@@ -30,10 +30,7 @@ class Settings(BaseSettings):
 
     DATABASE_URL: str
 
-    model_config = SettingsConfigDict(
-        env_file=env_file,
-        extra="ignore"
-    )
+    model_config = SettingsConfigDict(env_file=env_file, extra="ignore")
 
 
 settings = Settings()

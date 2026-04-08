@@ -12,17 +12,17 @@ def get_current_user(token: str = Depends(oauth2_scheme)):
 
         if payload["type"] != "access":
             raise Exception()
-        
+
         user_id = payload.get("user_id")
 
         if not user_id:
             raise Exception()
-        
-        user = fake_users_db.get(user_id) # REAL DB TODO!!!
-        
+
+        user = fake_users_db.get(user_id)  # REAL DB TODO!!!
+
         if not user or user["disabled"] or not user["is_verified"]:
             raise Exception()
-        
+
         return user
     except Exception:
         raise HTTPException(

@@ -8,14 +8,15 @@ conf = ConnectionConfig(
     MAIL_PORT=settings.MAIL_PORT,
     MAIL_SERVER=settings.MAIL_SERVER,
     MAIL_FROM_NAME=settings.MAIL_FROM_NAME,  # Имя отправителя
-    MAIL_STARTTLS=settings.MAIL_STARTTLS,    # True для Gmail
-    MAIL_SSL_TLS=settings.MAIL_SSL_TLS,      # False для Gmail
-    USE_CREDENTIALS=True,                     # Обязательно!
-    VALIDATE_CERTS=True                       # Проверка сертификатов
+    MAIL_STARTTLS=settings.MAIL_STARTTLS,  # True для Gmail
+    MAIL_SSL_TLS=settings.MAIL_SSL_TLS,  # False для Gmail
+    USE_CREDENTIALS=True,  # Обязательно!
+    VALIDATE_CERTS=True,  # Проверка сертификатов
 )
 
 # 2. СОЗДАЕМ ОБЪЕКТ FastMail (ОДИН РАЗ)
 fm = FastMail(conf)
+
 
 async def send_verification_email(email: str, verify_link: str):
     """
@@ -42,7 +43,7 @@ async def send_verification_email(email: str, verify_link: str):
     </body>
     </html>
     """
-    
+
     # Создаем сообщение
     message = MessageSchema(
         subject="Подтверждение email | Your App Name",
@@ -50,7 +51,7 @@ async def send_verification_email(email: str, verify_link: str):
         body=html_body,
         subtype="html",  # Указываем, что это HTML
     )
-    
+
     try:
         # Отправляем письмо
         await fm.send_message(message)

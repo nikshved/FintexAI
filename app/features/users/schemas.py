@@ -16,12 +16,7 @@ class UserRead(BaseModel):
 
 
 class UserCreate(BaseModel):
-    username: str = Field(
-        ...,
-        min_length=3,
-        max_length=255,
-        pattern="^[a-zA-Z0-9_]+$"
-    )
+    username: str = Field(..., min_length=3, max_length=255, pattern="^[a-zA-Z0-9_]+$")
     email: EmailStr
     password: str = Field(..., min_length=6)
 
@@ -35,10 +30,7 @@ class UserCreate(BaseModel):
 
 class UserUpdate(BaseModel):
     username: Optional[str] = Field(
-        None,
-        min_length=3,
-        max_length=255,
-        pattern="^[a-zA-Z0-9_]+$"
+        None, min_length=3, max_length=255, pattern="^[a-zA-Z0-9_]+$"
     )
     email: Optional[EmailStr] = None
     password: Optional[str] = Field(None, min_length=6)

@@ -7,18 +7,16 @@ from .schemas import WalletFilters
 
 
 class WalletRepository:
-    """Repository for handling low-level database operations for Wallets"""
-
     # --- READ OPERATIONS ---
 
     async def get_one_by_id(self, db: AsyncSession, wallet_id: int) -> Optional[Wallet]:
-        """Fetch a single wallet by its primary key"""
         query = select(Wallet).where(Wallet.id == wallet_id)
         result = await db.execute(query)
         return result.scalar_one_or_none()
 
-    async def get_many_by_filters(self, db: AsyncSession, filters: WalletFilters) -> List[Wallet]:
-        """Fetch wallets based on dynamic filtering and pagination"""
+    async def get_many_by_filters(
+        self, db: AsyncSession, filters: WalletFilters
+    ) -> List[Wallet]:
         query = select(Wallet)
 
         # Apply filters
@@ -32,24 +30,23 @@ class WalletRepository:
             query = query.where(Wallet.balance >= filters.balance_min)
         if filters.balance_max is not None:
             query = query.where(Wallet.balance <= filters.balance_max)
-        
+
         # Default ordering
         query = query.order_by(Wallet.id.desc())
 
         # Pagination
         if filters.skip:
             query = query.offset(filters.skip)
-        
+
         limit = min(filters.limit or 100, 1000)
         query = query.limit(limit)
-        
+
         result = await db.execute(query)
         return list(result.scalars().all())
 
     # --- CREATE OPERATIONS ---
 
     async def create_one(self, db: AsyncSession, wallet_data: dict) -> Wallet:
-        """Insert a single wallet and return the new record"""
         try:
             query = insert(Wallet).values(**wallet_data).returning(Wallet)
             result = await db.execute(query)
@@ -60,8 +57,9 @@ class WalletRepository:
             await db.rollback()
             raise
 
-    async def create_many(self, db: AsyncSession, wallets_data: List[dict]) -> List[Wallet]:
-        """Insert multiple wallets in a single transaction"""
+    async def create_many(
+        self, db: AsyncSession, wallets_data: List[dict]
+    ) -> List[Wallet]:
         try:
             query = insert(Wallet).values(wallets_data).returning(Wallet)
             result = await db.execute(query)
@@ -74,8 +72,9 @@ class WalletRepository:
 
     # --- UPDATE OPERATIONS ---
 
-    async def update_one(self, db: AsyncSession, wallet_id: int, data: dict) -> Optional[Wallet]: 
-        """Update a specific wallet and return the updated record"""
+    async def update_one(
+        self, db: AsyncSession, wallet_id: int, data: dict
+    ) -> Optional[Wallet]:
         try:
             query = (
                 update(Wallet)
@@ -85,7 +84,7 @@ class WalletRepository:
             )
             result = await db.execute(query)
             updated_wallet = result.scalar_one_or_none()
-            
+
             if updated_wallet:
                 await db.commit()
             return updated_wallet
@@ -93,8 +92,9 @@ class WalletRepository:
             await db.rollback()
             raise
 
-    async def update_many(self, db: AsyncSession, wallets_data: List[dict]) -> List[Wallet]:
-        """Update multiple wallets individually within a single transaction"""
+    async def update_many(
+        self, db: AsyncSession, wallets_data: List[dict]
+    ) -> List[Wallet]:
         updated_wallets = []
         try:
             for data in wallets_data:
@@ -106,33 +106,32 @@ class WalletRepository:
                 query = (
                     update(Wallet)
                     .where(Wallet.id == wallet_id)
-                    .values(**data) 
+                    .values(**data)
                     .returning(Wallet)
                 )
-                
+
                 result = await db.execute(query)
                 updated_obj = result.scalar_one_or_none()
-                
+
                 if updated_obj:
                     updated_wallets.append(updated_obj)
 
             if updated_wallets:
                 await db.commit()
-                
+
             return updated_wallets
         except Exception:
             await db.rollback()
             raise
-            
+
     # --- DELETE OPERATIONS ---
 
     async def delete_one(self, db: AsyncSession, wallet_id: int) -> bool:
-        """Delete a wallet by ID and return success status"""
         try:
             query = delete(Wallet).where(Wallet.id == wallet_id).returning(Wallet.id)
             result = await db.execute(query)
             deleted_id = result.scalar_one_or_none()
-            
+
             if deleted_id:
                 await db.commit()
                 return True
@@ -140,14 +139,13 @@ class WalletRepository:
         except Exception:
             await db.rollback()
             raise
-    
+
     async def delete_many(self, db: AsyncSession, wallet_ids: List[int]) -> List[int]:
-        """Delete multiple wallets and return list of deleted IDs"""
         try:
             query = delete(Wallet).where(Wallet.id.in_(wallet_ids)).returning(Wallet.id)
             result = await db.execute(query)
             deleted_ids = list(result.scalars().all())
-            
+
             if deleted_ids:
                 await db.commit()
             return deleted_ids

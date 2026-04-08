@@ -5,10 +5,9 @@ from .engine import engine
 
 
 async_session_local = async_sessionmaker(
-    bind=engine,
-    expire_on_commit=False,
-    autoflush=False
+    bind=engine, expire_on_commit=False, autoflush=False
 )
+
 
 async def get_db():
     async with async_session_local() as session:

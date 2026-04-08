@@ -29,7 +29,9 @@ class WalletRead(WalletBase):
 
 # --- CREATE SCHEMA ---
 class WalletCreate(WalletBase):
-    balance: Decimal = Field(default=Decimal("0.00"), ge=0, max_digits=20, decimal_places=2)
+    balance: Decimal = Field(
+        default=Decimal("0.00"), ge=0, max_digits=20, decimal_places=2
+    )
 
 
 # --- UPDATE SCHEMA ---
@@ -67,11 +69,11 @@ class WalletFilters(BaseModel):
     created_at_from: Optional[datetime] = None
     created_at_to: Optional[datetime] = None
 
-    # Pagination 
+    # Pagination
     skip: int = Field(default=0, ge=0)
     limit: int = Field(default=50, ge=1, le=1000)
 
-    # Analytics 
+    # Analytics
     with_stats: bool = False
     stats_date_from: Optional[datetime] = None
     stats_date_to: Optional[datetime] = None

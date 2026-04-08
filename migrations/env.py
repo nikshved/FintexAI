@@ -25,6 +25,7 @@ config.set_main_option("sqlalchemy.url", settings.DATABASE_URL)
 # Метаданные моделей
 target_metadata = Base.metadata
 
+
 def run_migrations_offline() -> None:
     """Запуск миграций в 'offline' режиме (генерация SQL-скриптов)."""
     url = config.get_main_option("sqlalchemy.url")
@@ -42,6 +43,7 @@ def run_migrations_offline() -> None:
     with context.begin_transaction():
         context.run_migrations()
 
+
 def do_run_migrations(connection):
     """Синхронный запуск миграций внутри асинхронного соединения."""
     context.configure(
@@ -56,9 +58,10 @@ def do_run_migrations(connection):
     with context.begin_transaction():
         context.run_migrations()
 
+
 async def run_migrations_online() -> None:
     """Запуск миграций в 'online' режиме (асинхронное подключение)."""
-    
+
     # Создаем асинхронный движок
     connectable = async_engine_from_config(
         config.get_section(config.config_ini_section, {}),
@@ -71,6 +74,7 @@ async def run_migrations_online() -> None:
         await connection.run_sync(do_run_migrations)
 
     await connectable.dispose()
+
 
 # Входная точка
 if context.is_offline_mode():

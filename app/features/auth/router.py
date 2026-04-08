@@ -11,11 +11,7 @@ auth_router = APIRouter(prefix="/auth", tags=["auth"])
 @auth_router.post("/register")
 async def register(data: RegisterRequest):
 
-    await AuthService.register(
-        data.username,
-        data.email,
-        data.password
-    )
+    await AuthService.register(data.username, data.email, data.password)
 
     return {
         "message": "User registered. Please check your email to verify your account."
@@ -37,25 +33,16 @@ def verify_email(token: str, response: Response):
         httponly=True,
         secure=False,
         samesite="lax",
-        max_age=60 * 60 * 24 * 30
+        max_age=60 * 60 * 24 * 30,
     )
 
-    return {
-        "access_token": access,
-        "token_type": "bearer"
-    }
+    return {"access_token": access, "token_type": "bearer"}
 
 
 @auth_router.post("/login", response_model=TokenResponse)
-def login(
-    form_data: OAuth2PasswordRequestForm = Depends(),
-    response: Response = None
-):
+def login(form_data: OAuth2PasswordRequestForm = Depends(), response: Response = None):
 
-    tokens = AuthService.login(
-        form_data.username,
-        form_data.password
-    )
+    tokens = AuthService.login(form_data.username, form_data.password)
 
     if not tokens:
         raise HTTPException(401, "Invalid credentials")
@@ -68,13 +55,10 @@ def login(
         httponly=True,
         secure=False,
         samesite="lax",
-        max_age=60 * 60 * 24 * 30
+        max_age=60 * 60 * 24 * 30,
     )
 
-    return {
-        "access_token": access,
-        "token_type": "bearer"
-    }
+    return {"access_token": access, "token_type": "bearer"}
 
 
 @auth_router.post("/refresh", response_model=TokenResponse)
@@ -98,13 +82,10 @@ def refresh(request: Request, response: Response):
         httponly=True,
         secure=False,
         samesite="lax",
-        max_age=60 * 60 * 24 * 30
+        max_age=60 * 60 * 24 * 30,
     )
 
-    return {
-        "access_token": access,
-        "token_type": "bearer"
-    }
+    return {"access_token": access, "token_type": "bearer"}
 
 
 @auth_router.post("/logout")
@@ -117,6 +98,4 @@ def logout(request: Request, response: Response):
 
     response.delete_cookie("refresh_token")
 
-    return {
-        "message": "Logged out"
-    }
+    return {"message": "Logged out"}

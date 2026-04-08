@@ -14,6 +14,4 @@ fake_users_db = {
     }
 }
 
-fake_refresh_tokens = {
- "token123": 1
-}
+fake_refresh_tokens = {"token123": 1}
