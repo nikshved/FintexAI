@@ -85,9 +85,9 @@ class Transaction(Base):
 
     # --- Relationships ---
     wallet: Mapped["Wallet"] = relationship("Wallet", back_populates="transactions")  # type: ignore
-    category: Mapped["Category"] = relationship(
+    category: Mapped["Category"] = relationship(  # type: ignore
         "Category", back_populates="transactions"
-    )  # type: ignore
+    )
 
     linked_transaction: Mapped[Optional["Transaction"]] = relationship(
         "Transaction", remote_side=[id], post_update=True

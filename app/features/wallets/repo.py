@@ -98,7 +98,6 @@ class WalletRepository:
         updated_wallets = []
         try:
             for data in wallets_data:
-                # Extract ID and only proceed if present
                 wallet_id = data.pop("id", None)
                 if wallet_id is None:
                     continue
@@ -145,7 +144,6 @@ class WalletRepository:
             query = delete(Wallet).where(Wallet.id.in_(wallet_ids)).returning(Wallet.id)
             result = await db.execute(query)
             deleted_ids = list(result.scalars().all())
-
             if deleted_ids:
                 await db.commit()
             return deleted_ids

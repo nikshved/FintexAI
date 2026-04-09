@@ -10,7 +10,6 @@ auth_router = APIRouter(prefix="/auth", tags=["auth"])
 
 @auth_router.post("/register")
 async def register(data: RegisterRequest):
-
     await AuthService.register(data.username, data.email, data.password)
 
     return {
@@ -41,7 +40,6 @@ def verify_email(token: str, response: Response):
 
 @auth_router.post("/login", response_model=TokenResponse)
 def login(form_data: OAuth2PasswordRequestForm = Depends(), response: Response = None):
-
     tokens = AuthService.login(form_data.username, form_data.password)
 
     if not tokens:
@@ -63,7 +61,6 @@ def login(form_data: OAuth2PasswordRequestForm = Depends(), response: Response =
 
 @auth_router.post("/refresh", response_model=TokenResponse)
 def refresh(request: Request, response: Response):
-
     refresh_token = request.cookies.get("refresh_token")
 
     if not refresh_token:
@@ -90,7 +87,6 @@ def refresh(request: Request, response: Response):
 
 @auth_router.post("/logout")
 def logout(request: Request, response: Response):
-
     refresh_token = request.cookies.get("refresh_token")
 
     if refresh_token:

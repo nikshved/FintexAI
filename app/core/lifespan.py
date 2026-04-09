@@ -7,7 +7,6 @@ from ..db.postgres.base import Base
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-
     # STARTUP
     async with engine.begin() as conn:
         await conn.run_sync(Base.metadata.create_all)
