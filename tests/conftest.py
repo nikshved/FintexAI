@@ -1,28 +1,37 @@
 import pytest
 from httpx import AsyncClient, ASGITransport
-from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession
-from sqlalchemy.orm import sessionmaker
+from sqlalchemy.ext.asyncio import create_async_engine, async_sessionmaker
 
 from main import app
 from app.db.postgres.session import get_db
 from app.db.postgres.base import Base
+from app.features.wallets.models import Wallet
 
-DATABASE_URL = (
-    "postgresql+asyncpg://postgres:furina131furina@localhost:5432/fintexai_test"
-)
-
-engine = create_async_engine(DATABASE_URL)
-TestSessionLocal = sessionmaker(engine, class_=AsyncSession, expire_on_commit=False)
+DATABASE_URL = "postgresql+asyncpg://postgres:furina131furina@localhost:5432/fintexai_test"
 
 
 @pytest.fixture(scope="function")
-async def db():
-    async with engine.begin() as conn:
+async def test_engine():
+    engine = create_async_engine(DATABASE_URL, echo=False)
+    yield engine
+    await engine.dispose()
+
+
+@pytest.fixture(scope="function")
+async def db(test_engine):
+    async with test_engine.begin() as conn:
         await conn.run_sync(Base.metadata.drop_all)
         await conn.run_sync(Base.metadata.create_all)
 
-    async with TestSessionLocal() as session:
+    TestingSessionLocal = async_sessionmaker(
+        bind=test_engine,
+        expire_on_commit=False,
+        autoflush=False,
+    )
+
+    async with TestingSessionLocal() as session:
         yield session
+        await session.rollback()
 
 
 @pytest.fixture(scope="function")
@@ -32,9 +41,10 @@ async def client(db):
 
     app.dependency_overrides[get_db] = override_get_db
 
-    transport = ASGITransport(app=app)
-
-    async with AsyncClient(transport=transport, base_url="http://test") as client:
-        yield client
+    async with AsyncClient(
+        transport=ASGITransport(app=app),
+        base_url="http://test",
+    ) as ac:
+        yield ac
 
     app.dependency_overrides.clear()

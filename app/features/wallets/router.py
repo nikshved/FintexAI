@@ -38,9 +38,7 @@ async def get_wallet(
 
 
 # --- CREATE OPERATIONS ---
-@wallets_router.post(
-    "/", response_model=WalletRead, status_code=status.HTTP_201_CREATED
-)
+@wallets_router.post("/", response_model=WalletRead, status_code=status.HTTP_201_CREATED)
 async def create_wallet(data: WalletCreate, db: AsyncSession = Depends(get_db)):
     created_wallet = await service.create_wallet(db, data)
     if not created_wallet:
@@ -48,7 +46,7 @@ async def create_wallet(data: WalletCreate, db: AsyncSession = Depends(get_db)):
     return created_wallet
 
 
-@wallets_router.post("/bulk", response_model=List[WalletRead])
+@wallets_router.post("/bulk", response_model=List[WalletRead], status_code=status.HTTP_201_CREATED)
 async def create_wallets(
     data: WalletsCreate, response: Response, db: AsyncSession = Depends(get_db)
 ):
@@ -66,18 +64,6 @@ async def create_wallets(
 
 
 # --- UPDATE OPERATIONS ---
-@wallets_router.patch("/{wallet_id}", response_model=WalletRead)
-async def update_wallet(
-    wallet_id: int, data: WalletUpdate, db: AsyncSession = Depends(get_db)
-):
-    wallet = await service.update_wallet(db, wallet_id, data)
-    if not wallet:
-        raise HTTPException(
-            status_code=404, detail=f"Wallet {wallet_id} not found or no data provided"
-        )
-    return wallet
-
-
 @wallets_router.patch("/bulk", response_model=List[WalletRead])
 async def bulk_update_wallets(
     data: WalletsUpdate, response: Response, db: AsyncSession = Depends(get_db)
@@ -95,16 +81,20 @@ async def bulk_update_wallets(
     return updated_wallets
 
 
+@wallets_router.patch("/{wallet_id}", response_model=WalletRead)
+async def update_wallet(
+    wallet_id: int = Path(..., ge=1), data: WalletUpdate = ..., db: AsyncSession = Depends(get_db)
+):
+    wallet = await service.update_wallet(db, wallet_id, data)
+    if not wallet:
+        raise HTTPException(
+            status_code=404, detail=f"Wallet {wallet_id} not found or no data provided"
+        )
+    return wallet
+
+
 # --- DELETE OPERATIONS ---
-@wallets_router.delete("/{wallet_id}", status_code=status.HTTP_204_NO_CONTENT)
-async def delete_wallet(wallet_id: int, db: AsyncSession = Depends(get_db)):
-    deleted = await service.delete_wallet(db, wallet_id)
-    if not deleted:
-        raise HTTPException(status_code=404, detail=f"Wallet {wallet_id} not found")
-    return None
-
-
-@wallets_router.delete("/bulk")
+@wallets_router.delete("/bulk", response_model=List[int])
 async def delete_wallets(
     data: WalletsDelete, response: Response, db: AsyncSession = Depends(get_db)
 ):
@@ -119,3 +109,13 @@ async def delete_wallets(
         response.status_code = status.HTTP_200_OK
 
     return deleted_ids
+
+
+@wallets_router.delete("/{wallet_id}", status_code=status.HTTP_204_NO_CONTENT)
+async def delete_wallet(
+    wallet_id: int = Path(..., ge=1), db: AsyncSession = Depends(get_db)
+):
+    deleted = await service.delete_wallet(db, wallet_id)
+    if not deleted:
+        raise HTTPException(status_code=404, detail=f"Wallet {wallet_id} not found")
+    return None

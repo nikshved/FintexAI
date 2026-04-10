@@ -19,7 +19,6 @@ class WalletRepository:
     ) -> List[Wallet]:
         query = select(Wallet)
 
-        # Apply filters
         if filters.ids:
             query = query.where(Wallet.id.in_(filters.ids))
         if filters.names:
@@ -30,16 +29,17 @@ class WalletRepository:
             query = query.where(Wallet.balance >= filters.balance_min)
         if filters.balance_max is not None:
             query = query.where(Wallet.balance <= filters.balance_max)
+        if filters.created_at_from is not None:
+            query = query.where(Wallet.created_at >= filters.created_at_from)
+        if filters.created_at_to is not None:
+            query = query.where(Wallet.created_at <= filters.created_at_to)
 
-        # Default ordering
         query = query.order_by(Wallet.id.desc())
 
-        # Pagination
-        if filters.skip:
+        if filters.skip is not None:
             query = query.offset(filters.skip)
 
-        limit = min(filters.limit or 100, 1000)
-        query = query.limit(limit)
+        query = query.limit(filters.limit)
 
         result = await db.execute(query)
         return list(result.scalars().all())
@@ -47,106 +47,63 @@ class WalletRepository:
     # --- CREATE OPERATIONS ---
 
     async def create_one(self, db: AsyncSession, wallet_data: dict) -> Wallet:
-        try:
-            query = insert(Wallet).values(**wallet_data).returning(Wallet)
-            result = await db.execute(query)
-            new_wallet = result.scalar_one()
-            await db.commit()
-            return new_wallet
-        except Exception:
-            await db.rollback()
-            raise
+        query = insert(Wallet).values(**wallet_data).returning(Wallet)
+        result = await db.execute(query)
+        return result.scalar_one()
 
     async def create_many(
         self, db: AsyncSession, wallets_data: List[dict]
     ) -> List[Wallet]:
-        try:
-            query = insert(Wallet).values(wallets_data).returning(Wallet)
-            result = await db.execute(query)
-            new_wallets = list(result.scalars().all())
-            await db.commit()
-            return new_wallets
-        except Exception:
-            await db.rollback()
-            raise
+        query = insert(Wallet).values(wallets_data).returning(Wallet)
+        result = await db.execute(query)
+        return list(result.scalars().all())
 
     # --- UPDATE OPERATIONS ---
 
     async def update_one(
         self, db: AsyncSession, wallet_id: int, data: dict
     ) -> Optional[Wallet]:
-        try:
-            query = (
-                update(Wallet)
-                .where(Wallet.id == wallet_id)
-                .values(**data)
-                .returning(Wallet)
-            )
-            result = await db.execute(query)
-            updated_wallet = result.scalar_one_or_none()
-
-            if updated_wallet:
-                await db.commit()
-            return updated_wallet
-        except Exception:
-            await db.rollback()
-            raise
+        query = (
+            update(Wallet)
+            .where(Wallet.id == wallet_id)
+            .values(**data)
+            .returning(Wallet)
+        )
+        result = await db.execute(query)
+        return result.scalar_one_or_none()
 
     async def update_many(
         self, db: AsyncSession, wallets_data: List[dict]
     ) -> List[Wallet]:
-        updated_wallets = []
-        try:
-            for data in wallets_data:
-                wallet_id = data.pop("id", None)
-                if wallet_id is None:
-                    continue
+        if not wallets_data:
+            return []
 
-                query = (
-                    update(Wallet)
-                    .where(Wallet.id == wallet_id)
-                    .values(**data)
-                    .returning(Wallet)
-                )
+        valid_data = [
+            d for d in wallets_data
+            if d.get("id") and len({k: v for k, v in d.items() if k != "id"}) > 0
+        ]
 
-                result = await db.execute(query)
-                updated_obj = result.scalar_one_or_none()
+        if not valid_data:
+            return []
 
-                if updated_obj:
-                    updated_wallets.append(updated_obj)
+        await db.execute(update(Wallet), valid_data)
 
-            if updated_wallets:
-                await db.commit()
-
-            return updated_wallets
-        except Exception:
-            await db.rollback()
-            raise
+        ids = [d["id"] for d in valid_data]
+        result = await db.execute(select(Wallet).where(Wallet.id.in_(ids)))
+        return list(result.scalars().all())
 
     # --- DELETE OPERATIONS ---
 
     async def delete_one(self, db: AsyncSession, wallet_id: int) -> bool:
-        try:
-            query = delete(Wallet).where(Wallet.id == wallet_id).returning(Wallet.id)
-            result = await db.execute(query)
-            deleted_id = result.scalar_one_or_none()
-
-            if deleted_id:
-                await db.commit()
-                return True
-            return False
-        except Exception:
-            await db.rollback()
-            raise
+        query = delete(Wallet).where(Wallet.id == wallet_id).returning(Wallet.id)
+        result = await db.execute(query)
+        deleted_id = result.scalar_one_or_none()
+        return deleted_id is not None
 
     async def delete_many(self, db: AsyncSession, wallet_ids: List[int]) -> List[int]:
-        try:
-            query = delete(Wallet).where(Wallet.id.in_(wallet_ids)).returning(Wallet.id)
-            result = await db.execute(query)
-            deleted_ids = list(result.scalars().all())
-            if deleted_ids:
-                await db.commit()
-            return deleted_ids
-        except Exception:
-            await db.rollback()
-            raise
+        query = delete(Wallet).where(Wallet.id.in_(wallet_ids)).returning(Wallet.id)
+        result = await db.execute(query)
+        return list(result.scalars().all())
+
+
+repository = WalletRepository()

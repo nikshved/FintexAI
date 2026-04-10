@@ -13,7 +13,8 @@ from sqlalchemy import (
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.db.postgres.base import Base
-
+from app.features.transactions.models import Transaction
+from app.features.wallets.models import Wallet
 
 class Category(Base):
     """Expense or Income category linked to a specific wallet"""
@@ -40,9 +41,16 @@ class Category(Base):
     )
 
     # --- Relationships ---
-    wallet: Mapped["Wallet"] = relationship("Wallet", back_populates="categories")  # type: ignore
-    transactions: Mapped[List["Transaction"]] = relationship(  # type: ignore
-        "Transaction", back_populates="category"
+    wallets: Mapped[Wallet] = relationship(
+        Wallet,
+        back_populates="categories",
+        lazy="selectin"
+    ) 
+    transactions: Mapped[List[Transaction]] = relationship( 
+        Transaction,
+        back_populates="categories",
+        cascade="all, delete-orphan",
+        lazy="selectin"
     )
 
     # --- Constraints & Indexes ---
