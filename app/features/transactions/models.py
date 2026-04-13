@@ -20,7 +20,7 @@ from app.db.postgres.base import Base
 
 class TransactionType(str, PyEnum):
     """Operation types for financial movements"""
-
+    
     INCOME = "INCOME"
     EXPENSE = "EXPENSE"
     TRANSFER = "TRANSFER"

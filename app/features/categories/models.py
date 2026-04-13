@@ -17,8 +17,6 @@ from app.features.transactions.models import Transaction
 from app.features.wallets.models import Wallet
 
 class Category(Base):
-    """Expense or Income category linked to a specific wallet"""
-
     __tablename__ = "categories"
 
     # --- Fields ---
@@ -34,6 +32,12 @@ class Category(Base):
     init_date: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), server_default=func.now(), nullable=False
     )
+    updated_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True),
+        server_default=func.now(),
+        server_onupdate=func.now(),
+        nullable=False,
+    )
 
     # --- Foreign Keys ---
     wallet_id: Mapped[int] = mapped_column(
@@ -41,8 +45,8 @@ class Category(Base):
     )
 
     # --- Relationships ---
-    wallets: Mapped[Wallet] = relationship(
-        Wallet,
+    wallet: Mapped["Wallet"] = relationship(
+        "Wallet",
         back_populates="categories",
         lazy="selectin"
     ) 
@@ -50,7 +54,7 @@ class Category(Base):
         Transaction,
         back_populates="categories",
         cascade="all, delete-orphan",
-        lazy="selectin"
+        lazy="noload"
     )
 
     # --- Constraints & Indexes ---

@@ -1,3 +1,4 @@
+from typing import TYPE_CHECKING, List, Optional
 from datetime import datetime
 from decimal import Decimal
 from enum import Enum as PyEnum
@@ -49,20 +50,18 @@ class Wallet(Base):
     )
 
     # --- Relationships ---
-    # user: Mapped["User"] = relationship("User", back_populates="wallets")
-
-    # categories: Mapped[List["Category"]] = relationship(
-    #     "Category",
-    #     back_populates="wallet",
-    #     cascade="all, delete-orphan",
-    #     lazy="selectin",
-    # )
-    # transactions: Mapped[List["Transaction"]] = relationship(
-    #     "Transaction",
-    #     back_populates="wallet",
-    #     cascade="all, delete-orphan",
-    #     lazy="selectin",
-    # )
+    categories: Mapped[List["Category"]] = relationship(
+        "Category",
+        back_populates="wallet",
+        cascade="all, delete-orphan",
+        lazy="selectin", # categories few
+    )
+    transactions: Mapped[List["Transaction"]] = relationship(
+        "Transaction",
+        back_populates="wallet",
+        cascade="all, delete-orphan",
+        lazy="noload", # transactions many
+    )
 
     # --- Table Arguments ---
     __table_args__ = (
