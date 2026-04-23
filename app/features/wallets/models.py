@@ -7,13 +7,11 @@ from sqlalchemy import (
     String,
     DateTime,
     Numeric,
+    UniqueConstraint,
     func,
-    CheckConstraint,
-    ForeignKey,
     Enum as SQLEnum,
 )
 from sqlalchemy.orm import Mapped, mapped_column, relationship
-from sqlalchemy.schema import FetchedValue
 
 from app.db.postgres.base import Base
 
@@ -45,7 +43,7 @@ class Wallet(Base):
     updated_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True),
         server_default=func.now(),
-        server_onupdate=func.now(),
+        onupdate=func.now(), # update time python side
         nullable=False,
     )
 
@@ -65,5 +63,5 @@ class Wallet(Base):
 
     # --- Table Arguments ---
     __table_args__ = (
-        CheckConstraint("balance >= 0", name="check_wallet_balance_non_negative"),
+        UniqueConstraint("name", name="wallet_name"),
     )
