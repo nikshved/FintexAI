@@ -43,7 +43,7 @@ class Wallet(Base):
     updated_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True),
         server_default=func.now(),
-        onupdate=func.now(), # update time python side
+        server_onupdate=func.now(),
         nullable=False,
     )
 
