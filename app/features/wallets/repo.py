@@ -1,6 +1,6 @@
 from typing import List, Optional
 
-from sqlalchemy import select, insert, update, delete, bindparam
+from sqlalchemy import select, insert, update, delete
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from .models import Wallet
@@ -25,6 +25,8 @@ class WalletRepository:
 
         # --- filters ---
         if filters.ids:
+            if not filters.ids:
+                return []
             query = query.where(Wallet.id.in_(filters.ids))
 
         if filters.names:
@@ -62,38 +64,35 @@ class WalletRepository:
     async def create_one(
         self, db: AsyncSession, wallet: dict
     ) -> Optional[Wallet]:
-        query = (
+        result = await db.execute(
             insert(Wallet)
             .values(**wallet)
             .on_conflict_do_nothing(index_elements=["name"])
             .returning(Wallet)
         )
-        result = await db.execute(query)
         return result.scalar_one_or_none()
 
     # UPDATE OPERATIONS
     async def update_one(
         self, db: AsyncSession, wallet_id: int, wallet: dict
     ) -> Optional[Wallet]:
-        query = (
+        result = await db.execute (
             update(Wallet)
             .where(Wallet.id == wallet_id)
             .values(**wallet)
             .returning(Wallet)
         )
-        result = await db.execute(query)
         return result.scalar_one_or_none()
 
     # DELETE OPERATIONS
     async def delete_one(
         self, db: AsyncSession, wallet_id: int
     ) -> Optional[int]:
-        query = (
+        result = await db.execute (
             delete(Wallet)
             .where(Wallet.id == wallet_id)
             .returning(Wallet.id)
         )
-        result = await db.execute(query)
         return result.scalar_one_or_none()
 
 
