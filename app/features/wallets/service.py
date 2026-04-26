@@ -2,7 +2,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.exc import  IntegrityError, SQLAlchemyError
 from typing import List, Optional
 
-from app.core.exceptions import ConflictError, InternalServerError, NotFoundError, DatabaseError
+from app.core.exceptions import ConflictError, NotFoundError, DatabaseError
 from .models import Wallet
 from .repo import WalletRepository
 
@@ -10,7 +10,6 @@ from .schemas import (
     WalletCreate,
     WalletUpdate,
     WalletFilters,
-    WalletsUpdateItem,
 )
 
 
@@ -19,7 +18,7 @@ class WalletService:
         self.repo = WalletRepository()
 
     # --- READ OPERATIONS ---
-    async def get_wallet(self, db: AsyncSession, wallet_id: int) -> Optional[Wallet]:
+    async def get_wallet(self, db: AsyncSession, wallet_id: int) -> Wallet:
         try:
             wallet = await self.repo.get_one_by_id(db, wallet_id)
             
@@ -46,18 +45,20 @@ class WalletService:
     # --- CREATE OPERATIONS ---
     async def create_wallet(self, db: AsyncSession, data: WalletCreate) -> Wallet:
         try:
-            async with db.begin():
-                created_wallet = await self.repo.create_one(db, data.name)
-                
-                if created_wallet is not None:
-                    raise ConflictError("Wallet already exists")
-                
-                return created_wallet
+            created_wallet = await self.repo.create_one(db, data.model_dump())
+            
+            if created_wallet is None:
+                raise ConflictError("Wallet already exists")
+            
+            await db.commit()
+            return created_wallet
         
         except IntegrityError:
+            await db.rollback()
             raise ConflictError("Wallet already exists")
     
         except SQLAlchemyError as e:
+            await db.rollback()
             raise DatabaseError(f"Database error")
 
 
@@ -69,27 +70,35 @@ class WalletService:
             update_data = data.model_dump(exclude_unset=True)
             
             if not update_data:
-                raise NotFoundError("No data provided for update")
+                raise ConflictError("No data provided for update")
             
-            async with db.begin():
-                updated_wallet = await self.repo.update_one(db, wallet_id, update_data)
+            updated_wallet = await self.repo.update_one(db, wallet_id, update_data)
                 
-                if updated_wallet is None:
-                    raise NotFoundError(f"Wallet with id {wallet_id} not found")
-                                
-                return updated_wallet
+            if updated_wallet is None:
+                raise NotFoundError(f"Wallet with id {wallet_id} not found")
+                
+            await db.commit()                
+            return updated_wallet
         except IntegrityError:
+            await db.rollback()
             raise ConflictError("Wallet already exists")
         
         except SQLAlchemyError as e:
+            await db.rollback()
             raise DatabaseError(f"Database error")
 
 
     # --- DELETE OPERATIONS ---
-    async def delete_wallet(self, db: AsyncSession, wallet_id: int) -> bool:
-        deleted = await self.repo.delete_one(db, wallet_id)
-        if deleted:
+    async def delete_wallet(self, db: AsyncSession, wallet_id: int) -> None:
+        try:
+            deleted_wallet_id = await self.repo.delete_one(db, wallet_id)
+                
+            if deleted_wallet_id is None:
+                raise NotFoundError(f"Wallet with id {wallet_id} not found")
+                
             await db.commit()
-        return deleted
+        except SQLAlchemyError as e:
+            await db.rollback()
+            raise DatabaseError(f"Database error")
 
 service = WalletService()

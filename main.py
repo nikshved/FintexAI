@@ -10,6 +10,20 @@ from app.features.wallets.router import wallets_router
 from seeds.products_seed import fake_products_db
 
 
+from app.core.handlers import (
+    not_found_handler,
+    conflict_handler,
+    database_handler,
+    internal_handler,
+)
+
+from app.core.exceptions import (
+    NotFoundError,
+    ConflictError,
+    DatabaseError,
+    InternalServerError,
+)
+
 app = FastAPI(title="Store API", description="API for store", version="1.0.0")
 
 
@@ -21,6 +35,11 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+app.add_exception_handler(NotFoundError, not_found_handler)
+app.add_exception_handler(ConflictError, conflict_handler)
+app.add_exception_handler(DatabaseError, database_handler)
+app.add_exception_handler(InternalServerError, internal_handler)
 
 
 @app.get("/")

@@ -1,6 +1,7 @@
 from typing import List, Optional
 
 from sqlalchemy import select, insert, update, delete
+from sqlalchemy.dialects.postgresql import insert
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from .models import Wallet
@@ -67,7 +68,6 @@ class WalletRepository:
         result = await db.execute(
             insert(Wallet)
             .values(**wallet)
-            .on_conflict_do_nothing(index_elements=["name"])
             .returning(Wallet)
         )
         return result.scalar_one_or_none()

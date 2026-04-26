@@ -6,6 +6,8 @@ from main import app
 from app.db.postgres.session import get_db
 from app.db.postgres.base import Base
 from app.features.wallets.models import Wallet
+# from app.features.categories.models import Category
+# from app.features.transactions.models import Transaction
 
 DATABASE_URL = "postgresql+asyncpg://postgres:furina131furina@localhost:5432/fintexai_test"
 

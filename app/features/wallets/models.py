@@ -47,19 +47,19 @@ class Wallet(Base):
         nullable=False,
     )
 
-    # --- Relationships ---
-    categories: Mapped[List["Category"]] = relationship(
-        "Category",
-        back_populates="wallet",
-        cascade="all, delete-orphan",
-        lazy="selectin", # categories few
-    )
-    transactions: Mapped[List["Transaction"]] = relationship(
-        "Transaction",
-        back_populates="wallet",
-        cascade="all, delete-orphan",
-        lazy="noload", # transactions many
-    )
+    # # --- Relationships ---
+    # categories: Mapped[List["Category"]] = relationship(
+    #     "Category",
+    #     back_populates="wallet",
+    #     cascade="all, delete-orphan",
+    #     lazy="selectin", # categories few
+    # )
+    # transactions: Mapped[List["Transaction"]] = relationship(
+    #     "Transaction",
+    #     back_populates="wallet",
+    #     cascade="all, delete-orphan",
+    #     lazy="noload", # transactions many
+    # )
 
     # --- Table Arguments ---
     __table_args__ = (
