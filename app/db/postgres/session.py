@@ -12,4 +12,3 @@ async_session_local = async_sessionmaker(
 async def get_db():
     async with async_session_local() as session:
         yield session
-

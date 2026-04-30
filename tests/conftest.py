@@ -1,15 +1,18 @@
 import pytest
 from httpx import AsyncClient, ASGITransport
+from sqlalchemy import text
 from sqlalchemy.ext.asyncio import create_async_engine, async_sessionmaker
 
 from main import app
 from app.db.postgres.session import get_db
 from app.db.postgres.base import Base
 from app.features.wallets.models import Wallet
-# from app.features.categories.models import Category
+from app.features.categories.models import Category
 # from app.features.transactions.models import Transaction
 
-DATABASE_URL = "postgresql+asyncpg://postgres:furina131furina@localhost:5432/fintexai_test"
+DATABASE_URL = (
+    "postgresql+asyncpg://postgres:furina131furina@localhost:5432/fintexai_test"
+)
 
 
 @pytest.fixture(scope="function")
@@ -22,7 +25,8 @@ async def test_engine():
 @pytest.fixture(scope="function")
 async def db(test_engine):
     async with test_engine.begin() as conn:
-        await conn.run_sync(Base.metadata.drop_all)
+        await conn.execute(text("DROP SCHEMA public CASCADE"))
+        await conn.execute(text("CREATE SCHEMA public"))
         await conn.run_sync(Base.metadata.create_all)
 
     TestingSessionLocal = async_sessionmaker(

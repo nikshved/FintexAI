@@ -47,13 +47,13 @@ class Wallet(Base):
         nullable=False,
     )
 
-    # # --- Relationships ---
-    # categories: Mapped[List["Category"]] = relationship(
-    #     "Category",
-    #     back_populates="wallet",
-    #     cascade="all, delete-orphan",
-    #     lazy="selectin", # categories few
-    # )
+    # --- Relationships ---
+    categories: Mapped[List["Category"]] = relationship(
+        "Category",
+        back_populates="wallet",
+        cascade="all, delete-orphan",
+        lazy="selectin",  # categories few
+    )
     # transactions: Mapped[List["Transaction"]] = relationship(
     #     "Transaction",
     #     back_populates="wallet",
@@ -62,6 +62,4 @@ class Wallet(Base):
     # )
 
     # --- Table Arguments ---
-    __table_args__ = (
-        UniqueConstraint("name", name="wallet_name"),
-    )
+    __table_args__ = (UniqueConstraint("name", name="wallet_name"),)

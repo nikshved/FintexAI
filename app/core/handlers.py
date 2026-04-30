@@ -26,7 +26,7 @@ async def conflict_handler(request: Request, exc: ConflictError):
 async def database_handler(request: Request, exc: DatabaseError):
     return JSONResponse(
         status_code=500,
-        content={"detail": "Database error"},
+        content={"detail": "Database error: " + str(exc)},
     )
 
 

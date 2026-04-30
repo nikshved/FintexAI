@@ -9,14 +9,9 @@ from .schemas import WalletFilters
 
 
 class WalletRepository:
-
     # READ OPERATIONS
-    async def get_one_by_id(
-        self, db: AsyncSession, wallet_id: int
-    ) -> Optional[Wallet]:
-        result = await db.execute(
-            select(Wallet).where(Wallet.id == wallet_id)
-        )
+    async def get_one_by_id(self, db: AsyncSession, wallet_id: int) -> Optional[Wallet]:
+        result = await db.execute(select(Wallet).where(Wallet.id == wallet_id))
         return result.scalar_one_or_none()
 
     async def get_many_by_filters(
@@ -35,6 +30,9 @@ class WalletRepository:
 
         if filters.types:
             query = query.where(Wallet.type.in_(filters.types))
+
+        if filters.balance is not None:
+            query = query.where(Wallet.balance == filters.balance)
 
         if filters.balance_min is not None:
             query = query.where(Wallet.balance >= filters.balance_min)
@@ -62,36 +60,26 @@ class WalletRepository:
         return list(result.scalars().all())
 
     # CREATE OPERATIONS
-    async def create_one(
-        self, db: AsyncSession, wallet: dict
-    ) -> Optional[Wallet]:
-        result = await db.execute(
-            insert(Wallet)
-            .values(**wallet)
-            .returning(Wallet)
-        )
+    async def create_one(self, db: AsyncSession, data: dict) -> Optional[Wallet]:
+        result = await db.execute(insert(Wallet).values(**data).returning(Wallet))
         return result.scalar_one_or_none()
 
     # UPDATE OPERATIONS
     async def update_one(
-        self, db: AsyncSession, wallet_id: int, wallet: dict
+        self, db: AsyncSession, wallet_id: int, data: dict
     ) -> Optional[Wallet]:
-        result = await db.execute (
+        result = await db.execute(
             update(Wallet)
             .where(Wallet.id == wallet_id)
-            .values(**wallet)
+            .values(**data)
             .returning(Wallet)
         )
         return result.scalar_one_or_none()
 
     # DELETE OPERATIONS
-    async def delete_one(
-        self, db: AsyncSession, wallet_id: int
-    ) -> Optional[int]:
-        result = await db.execute (
-            delete(Wallet)
-            .where(Wallet.id == wallet_id)
-            .returning(Wallet.id)
+    async def delete_one(self, db: AsyncSession, wallet_id: int) -> Optional[int]:
+        result = await db.execute(
+            delete(Wallet).where(Wallet.id == wallet_id).returning(Wallet.id)
         )
         return result.scalar_one_or_none()
 

@@ -4,9 +4,9 @@ import json
 def log(step: str, res):
     status = res.status_code
     symbol = "✅" if status < 400 else "❌"
-    print(f"\n{'='*50}")
+    print(f"\n{'=' * 50}")
     print(f"{symbol}  {step}")
-    print(f"{'='*50}")
+    print(f"{'=' * 50}")
     print(f"STATUS: {status}")
     try:
         print("BODY:")

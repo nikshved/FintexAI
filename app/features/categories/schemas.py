@@ -3,67 +3,64 @@ from typing import Optional, List
 from datetime import datetime
 from decimal import Decimal
 
-from app.features.wallets.models import WalletType
-
 
 # --- BASE SCHEMA ---
-class WalletBase(BaseModel):
+class CategoryBase(BaseModel):
     name: str = Field(
         min_length=1, max_length=255, pattern=r"^[a-zA-Zа-яА-ЯёЁ0-9\s\-_]+$"
     )
-    type: WalletType
+    notation: Optional[str] = Field(None, min_length=1, max_length=500)
+    current_budget_limit: Decimal = Field(
+        default=Decimal("0.00"), ge=0, max_digits=20, decimal_places=2
+    )
 
 
-# --- READ SCHEMA (Response) ---
-class WalletRead(BaseModel):
+class CategoryRead(CategoryBase):
     id: int = Field(ge=1)
-    name: str
-    type: WalletType
-    balance: Decimal = Field(ge=0, max_digits=20, decimal_places=2)
     created_at: datetime
     updated_at: datetime
-
     model_config = ConfigDict(from_attributes=True)
 
 
-# --- CREATE SCHEMA ---
-class WalletCreate(WalletBase):
+class CategoryCreate(CategoryBase):
     pass
 
 
-# --- UPDATE SCHEMA ---
-class WalletUpdate(BaseModel): 
+class CategoryUpdate(BaseModel):
     name: Optional[str] = Field(
-        default=None, # important for PATCH updates
+        default=None, 
         min_length=1, 
         max_length=255, 
         pattern=r"^[a-zA-Zа-яА-ЯёЁ0-9\s\-_]+$"
     )
-    type: Optional[WalletType] = None
+    notation: Optional[str] = Field(
+        default=None,
+        min_length=1, 
+        max_length=500, 
+        pattern=r"^[a-zA-Zа-яА-ЯёЁ0-9\s\-_]+$"
+    )
+    current_budget_limit: Optional[Decimal] = Field(
+        default=None, 
+        ge=0, max_digits=20, decimal_places=2
+    )
 
 
-# --- FILTERS & PAGINATION ---
-class WalletFilters(BaseModel):
+class CategoryFilters(BaseModel):
     ids: Optional[List[int]] = Field(default=None, min_length=1, max_length=1000)
     names: Optional[List[str]] = Field(default=None, min_length=1, max_length=1000)
-    types: Optional[List[WalletType]] = Field(default=None, min_length=1)
-
-    balance: Optional[Decimal] = Field(default=None, ge=0)
-    balance_min: Optional[Decimal] = Field(default=None, ge=0)
-    balance_max: Optional[Decimal] = Field(default=None, ge=0)
-
+    # notations: Optional[List[str]] = Field(default=None, min_length=1, max_length=1000)
+    current_budget_limit: Optional[Decimal] = Field(default=None, ge=0)
+    current_budget_limit_min: Optional[Decimal] = Field(default=None, ge=0)
+    current_budget_limit_max: Optional[Decimal] = Field(default=None, ge=0)
+    created_at: Optional[datetime] = None   
     created_at_from: Optional[datetime] = None
     created_at_to: Optional[datetime] = None
-
     skip: int = Field(default=0, ge=0)
     limit: int = Field(default=50, ge=1, le=1000)
 
     @model_validator(mode="after")
-    def validate_ranges(self):
-        if self.balance_min is not None and self.balance_max is not None:
-            if self.balance_min > self.balance_max:
-                raise ValueError("balance_min must be <= balance_max")
-        if self.created_at_from is not None and self.created_at_to is not None:
+    def validate_dates(self):
+        if self.created_at_from and self.created_at_to:
             if self.created_at_from > self.created_at_to:
                 raise ValueError("created_at_from must be <= created_at_to")
         return self
