@@ -48,7 +48,6 @@ class WalletFilters(BaseModel):
     names: Optional[List[str]] = Field(default=None, min_length=1, max_length=1000)
     types: Optional[List[WalletType]] = Field(default=None, min_length=1)
 
-    balance: Optional[Decimal] = Field(default=None, ge=0)
     balance_min: Optional[Decimal] = Field(default=None, ge=0)
     balance_max: Optional[Decimal] = Field(default=None, ge=0)
 

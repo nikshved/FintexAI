@@ -7,7 +7,7 @@ from .schemas import (
     CategoryUpdate,
     CategoryFilters,
 )
-from .service import service
+from .service import category_service
 from app.db.postgres.session import get_db
 
 
@@ -17,16 +17,17 @@ categories_router = APIRouter(prefix="/categories", tags=["categories"])
 # --- READ OPERATIONS ---
 @categories_router.get("/", response_model=List[CategoryRead])
 async def get_categories(
-    filters: CategoryFilters = Depends(), db: AsyncSession = Depends(get_db)
+    filters: CategoryFilters = Depends(),
+    db: AsyncSession = Depends(get_db)
 ):
-    return await service.get_categories(db, filters)
+    return await category_service.get_сategories(db, filters)
 
 
 @categories_router.get("/{category_id}", response_model=CategoryRead)
 async def get_category(
     category_id: int = Path(..., ge=1), db: AsyncSession = Depends(get_db)
 ):
-    return await service.get_category(db, category_id)
+    return await category_service.get_category(db, category_id)
 
 
 # --- CREATE OPERATIONS ---
@@ -34,7 +35,7 @@ async def get_category(
     "/", response_model=CategoryRead, status_code=status.HTTP_201_CREATED
 )
 async def create_category(data: CategoryCreate, db: AsyncSession = Depends(get_db)):
-    return await service.create_category(db, data)
+    return await category_service.create_category(db, data)
 
 
 # --- UPDATE OPERATIONS ---
@@ -44,7 +45,7 @@ async def update_category(
     data: CategoryUpdate = ...,
     db: AsyncSession = Depends(get_db),
 ):
-    return await service.update_category(db, category_id, data)
+    return await category_service.update_category(db, category_id, data)
 
 
 # --- DELETE OPERATIONS ---
@@ -52,4 +53,4 @@ async def update_category(
 async def delete_category(
     category_id: int = Path(..., ge=1), db: AsyncSession = Depends(get_db)
 ):
-    return await service.delete_category(db, category_id)
+    return await category_service.delete_category(db, category_id)

@@ -4,7 +4,7 @@ from typing import List, Optional
 
 from app.core.exceptions import ConflictError, NotFoundError, DatabaseError
 from .models import Wallet
-from .repo import WalletRepository
+from .repo import wallet_repo
 
 from .schemas import (
     WalletCreate,
@@ -15,7 +15,7 @@ from .schemas import (
 
 class WalletService:
     def __init__(self):
-        self.repo = WalletRepository()
+        self.repo = wallet_repo
 
     # --- READ OPERATIONS ---
     async def get_wallet(self, db: AsyncSession, wallet_id: int) -> Wallet:
@@ -102,4 +102,4 @@ class WalletService:
             raise DatabaseError(f"Database error")
 
 
-service = WalletService()
+wallet_service = WalletService()

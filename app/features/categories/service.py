@@ -4,7 +4,7 @@ from typing import List, Optional
 
 from app.core.exceptions import ConflictError, NotFoundError, DatabaseError
 from .models import Category
-from .repo import CategoryRepository
+from .repo import category_repo
 
 from .schemas import (
     CategoryCreate,
@@ -15,7 +15,7 @@ from .schemas import (
 
 class CategoryService:
     def __init__(self):
-        self.repo = CategoryRepository()
+        self.repo = category_repo
 
     # --- READ OPERATIONS ---
     async def get_category(self, db: AsyncSession, category_id: int) -> Category:
@@ -54,6 +54,9 @@ class CategoryService:
 
         except IntegrityError:
             await db.rollback()
+            orig = str(e.orig).lower()
+            if "foreign key" in orig:
+                raise NotFoundError(f"Wallet {data.wallet_id} not found")
             raise ConflictError("Category already exists")
 
         except SQLAlchemyError as e:
@@ -102,4 +105,4 @@ class CategoryService:
             raise DatabaseError(f"Database error")
 
 
-service = CategoryService()
+category_service = CategoryService()

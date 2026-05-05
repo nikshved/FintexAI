@@ -17,13 +17,14 @@ class CategoryBase(BaseModel):
 
 class CategoryRead(CategoryBase):
     id: int = Field(ge=1)
+    wallet_id: int
     created_at: datetime
     updated_at: datetime
     model_config = ConfigDict(from_attributes=True)
 
 
 class CategoryCreate(CategoryBase):
-    pass
+    wallet_id: int = Field(ge=1)
 
 
 class CategoryUpdate(BaseModel):
@@ -49,10 +50,9 @@ class CategoryFilters(BaseModel):
     ids: Optional[List[int]] = Field(default=None, min_length=1, max_length=1000)
     names: Optional[List[str]] = Field(default=None, min_length=1, max_length=1000)
     # notations: Optional[List[str]] = Field(default=None, min_length=1, max_length=1000)
-    current_budget_limit: Optional[Decimal] = Field(default=None, ge=0)
+    wallet_id: Optional[int] = Field(default=None, ge=1) 
     current_budget_limit_min: Optional[Decimal] = Field(default=None, ge=0)
     current_budget_limit_max: Optional[Decimal] = Field(default=None, ge=0)
-    created_at: Optional[datetime] = None   
     created_at_from: Optional[datetime] = None
     created_at_to: Optional[datetime] = None
     skip: int = Field(default=0, ge=0)

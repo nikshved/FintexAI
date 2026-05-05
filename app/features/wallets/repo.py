@@ -61,7 +61,11 @@ class WalletRepository:
 
     # CREATE OPERATIONS
     async def create_one(self, db: AsyncSession, data: dict) -> Optional[Wallet]:
-        result = await db.execute(insert(Wallet).values(**data).returning(Wallet))
+        result = await db.execute(
+            insert(Wallet)
+            .values(**data)
+            .returning(Wallet)
+        )
         return result.scalar_one_or_none()
 
     # UPDATE OPERATIONS
@@ -79,9 +83,10 @@ class WalletRepository:
     # DELETE OPERATIONS
     async def delete_one(self, db: AsyncSession, wallet_id: int) -> Optional[int]:
         result = await db.execute(
-            delete(Wallet).where(Wallet.id == wallet_id).returning(Wallet.id)
+            delete(Wallet)
+            .where(Wallet.id == wallet_id)
+            .returning(Wallet.id)
         )
         return result.scalar_one_or_none()
 
-
-repository = WalletRepository()
+wallet_repo = WalletRepository()

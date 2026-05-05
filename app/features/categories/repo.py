@@ -88,4 +88,4 @@ class CategoryRepository:
         return result.scalar_one_or_none()
 
 
-repository = CategoryRepository()
+category_repo = CategoryRepository()

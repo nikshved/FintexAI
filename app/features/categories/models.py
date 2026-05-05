@@ -8,7 +8,6 @@ from sqlalchemy import (
     func,
     ForeignKey,
     CheckConstraint,
-    Index,
 )
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
@@ -16,6 +15,7 @@ from app.db.postgres.base import Base
 
 
 class Category(Base):
+    ''' Category financial operations'''
     __tablename__ = "categories"
 
     # --- Fields ---
@@ -24,10 +24,9 @@ class Category(Base):
     notation: Mapped[Optional[str]] = mapped_column(String(500), nullable=True)
 
     # Current budget limit for the category
-    current_budget_limit: Mapped[Decimal] = mapped_column(
+    budget_limit: Mapped[Decimal] = mapped_column(
         Numeric(20, 2), server_default="0.00", nullable=False
     )
-
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), server_default=func.now(), nullable=False
     )
@@ -44,21 +43,19 @@ class Category(Base):
     )
 
     # --- Relationships ---
-    wallet: Mapped["Wallet"] = relationship(
-        "Wallet", back_populates="categories", lazy="selectin"
+    wallet: Mapped["Wallet"] = relationship( 
+        "Wallet", 
+        back_populates="categories",
+        lazy="noload"
     )
-    # transactions: Mapped[List[Transaction]] = relationship(
-    #     Transaction,
-    #     back_populates="categories",
-    #     cascade="all, delete-orphan",
-    #     lazy="noload"
-    # )
+    transactions: Mapped[List["Transaction"]] = relationship(
+        "Transaction",
+        back_populates="category",
+        cascade="all, delete-orphan",
+        lazy="noload"
+    )
 
     # --- Constraints & Indexes ---
     __table_args__ = (
-        CheckConstraint(
-            "current_budget_limit >= 0",
-            name="check_category_ current_budget_limit_non_negative",
-        ),
-        Index("ix_category_wallet_id", "wallet_id"),
+        CheckConstraint("budget_limit >= 0", name="ck_category_budget_limit_non_negative"),
     )

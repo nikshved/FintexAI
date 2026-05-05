@@ -7,7 +7,7 @@ from .schemas import (
     WalletUpdate,
     WalletFilters,
 )
-from .service import service
+from .service import wallet_service
 from app.db.postgres.session import get_db
 
 
@@ -17,16 +17,18 @@ wallets_router = APIRouter(prefix="/wallets", tags=["wallets"])
 # --- READ OPERATIONS ---
 @wallets_router.get("/", response_model=List[WalletRead])
 async def get_wallets(
-    filters: WalletFilters = Depends(), db: AsyncSession = Depends(get_db)
+    filters: WalletFilters = Depends(),
+    db: AsyncSession = Depends(get_db),
+    wallet_service=Depends(wallet_service),
 ):
-    return await service.get_wallets(db, filters)
+    return await wallet_service.get_wallets(db, filters)
 
 
 @wallets_router.get("/{wallet_id}", response_model=WalletRead)
 async def get_wallet(
     wallet_id: int = Path(..., ge=1), db: AsyncSession = Depends(get_db)
 ):
-    return await service.get_wallet(db, wallet_id)
+    return await wallet_service.get_wallet(db, wallet_id)
 
 
 # --- CREATE OPERATIONS ---
@@ -34,7 +36,7 @@ async def get_wallet(
     "/", response_model=WalletRead, status_code=status.HTTP_201_CREATED
 )
 async def create_wallet(data: WalletCreate, db: AsyncSession = Depends(get_db)):
-    return await service.create_wallet(db, data)
+    return await wallet_service.create_wallet(db, data)
 
 
 # --- UPDATE OPERATIONS ---
@@ -44,7 +46,7 @@ async def update_wallet(
     data: WalletUpdate = ...,
     db: AsyncSession = Depends(get_db),
 ):
-    return await service.update_wallet(db, wallet_id, data)
+    return await wallet_service.update_wallet(db, wallet_id, data)
 
 
 # --- DELETE OPERATIONS ---
@@ -52,4 +54,4 @@ async def update_wallet(
 async def delete_wallet(
     wallet_id: int = Path(..., ge=1), db: AsyncSession = Depends(get_db)
 ):
-    return await service.delete_wallet(db, wallet_id)
+    return await wallet_service.delete_wallet(db, wallet_id)
